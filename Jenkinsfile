@@ -1,15 +1,18 @@
-Pipeline{
+pipeline {
+    agent any
 
-  stages{
-    stage ("Terraform Init"){
-      steps{
-        sh 'terraform init'
-        sh 'terraform plan' 
-      }
-    }
-      stage ("Choose the options"){
-      steps{
-        script {
+    stages {
+
+        stage('Terraform Plan') {
+            steps {
+                sh 'terraform init'
+                sh 'terraform plan'
+            }
+        }
+
+        stage('Manual Approval') {
+            steps {
+                script {
                     def choice = input(
                         message: 'Do you want to apply Terraform changes?',
                         ok: 'Submit',
@@ -26,14 +29,13 @@ Pipeline{
                         error("❌ User selected NO. Stopping pipeline.")
                     }
                 }
-      }
-    }  
-stage ("Creating Infra"){
-      steps{
-        sh 'terraform apply --auto-approve'
-        
-      }
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                sh 'terraform apply -auto-approve'
+            }
+        }
     }
-    
-  }
 }
